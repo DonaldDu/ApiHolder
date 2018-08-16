@@ -16,6 +16,11 @@
     }
 
 ```
+```
+dependencies {
+    implementation 'com.github.DonaldDu:ApiHolder:x.x.x'
+}
+```
 ## 定义接口
 在一个类中定义所有接口，方便查找和维护
 ```
