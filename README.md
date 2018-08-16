@@ -8,9 +8,12 @@
         api.methodC(1)
 
         //update api when needed
-        util.updateApi(ApiA::class.java, "https://www.a.com/")
+        util.updateApi(ApiA::class.java, "https://www.a2.com/")
     }
 
+```
+
+```
     interface ApiHolder : ApiA, ApiB, ApiC
 
     @BaseUrl("https://www.a.com/")

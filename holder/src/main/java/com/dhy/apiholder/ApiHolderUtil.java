@@ -24,8 +24,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiHolderUtil {
     @NonNull
-    private final OkHttpClient client;
-    @NonNull
     private final Retrofit retrofit;
     @NonNull
     protected final Map<Class, Object> apis = new HashMap<>();
@@ -37,8 +35,8 @@ public class ApiHolderUtil {
 
     public ApiHolderUtil(final boolean isAndroidApi, @Nullable OkHttpClient client, @Nullable Retrofit retrofit) {
         this.isAndroidApi = isAndroidApi;
-        this.client = client != null ? client : getClient();
-        this.retrofit = retrofit != null ? retrofit : getRetrofit(this.client);
+        OkHttpClient okHttpClient = client != null ? client : getClient();
+        this.retrofit = retrofit != null ? retrofit : getRetrofit(okHttpClient);
     }
 
     protected OkHttpClient getClient() {
@@ -54,7 +52,7 @@ public class ApiHolderUtil {
                 .build();
     }
 
-    public <HOLDER> HOLDER createHolderApi(@NonNull Class<HOLDER> apiHolder) {
+    public final <HOLDER> HOLDER createHolderApi(@NonNull Class<HOLDER> apiHolder) {
         Class<?>[] partApis = apiHolder.getInterfaces();
         for (Class api : partApis) {
             updateApi(api);
@@ -65,7 +63,7 @@ public class ApiHolderUtil {
     /**
      * update api with @{@link BaseUrl}
      */
-    public <API> void updateApi(Class<API> api) {
+    public final <API> void updateApi(Class<API> api) {
         if (api.isAnnotationPresent(BaseUrl.class)) {
             BaseUrl baseUrl = api.getAnnotation(BaseUrl.class);
             updateApi(api, baseUrl.value());
@@ -74,7 +72,7 @@ public class ApiHolderUtil {
         }
     }
 
-    public <API> void updateApi(Class<API> apiClass, String baseUrl) {
+    public final <API> void updateApi(Class<API> apiClass, String baseUrl) {
         Retrofit retrofit = this.retrofit.newBuilder().baseUrl(baseUrl).build();
         apis.put(apiClass, retrofit.create(apiClass));
     }
@@ -82,16 +80,19 @@ public class ApiHolderUtil {
     /**
      * hold all api in one
      */
-    protected <HOLDER> HOLDER createHolderApi(Class<HOLDER> apiHolder, final Map<Class, Object> apis) {
+    private <HOLDER> HOLDER createHolderApi(Class<HOLDER> apiHolder, final Map<Class, Object> apis) {
         return (HOLDER) Proxy.newProxyInstance(apiHolder.getClassLoader(), new Class<?>[]{apiHolder}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Object api = apis.get(method.getDeclaringClass());
-                Object result = method.invoke(api, args);
-                if (isAndroidApi) return setAndroidSchedulers(result);
-                return result;
+                return invokeApi(api, method, args, isAndroidApi);
             }
         });
+    }
+
+    protected Object invokeApi(Object api, Method method, Object[] args, boolean isAndroidApi) throws Throwable {
+        Object result = method.invoke(api, args);
+        return isAndroidApi ? setAndroidSchedulers(result) : result;
     }
 
     protected Object setAndroidSchedulers(Object result) {
