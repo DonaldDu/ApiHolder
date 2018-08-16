@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -25,15 +24,25 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiHolderUtil {
     @NonNull
-    protected OkHttpClient client;
+    private final OkHttpClient client;
     @NonNull
-    protected Retrofit retrofit;
+    private final Retrofit retrofit;
     @NonNull
-    protected final Map<Class, Object> holder = new HashMap<>();
+    protected final Map<Class, Object> apis = new HashMap<>();
+    protected final boolean isAndroidApi;
 
-    public ApiHolderUtil(@Nullable OkHttpClient client, @Nullable Retrofit retrofit) {
-        this.client = client != null ? client : new OkHttpClient();
+    public ApiHolderUtil() {
+        this(true, null, null);
+    }
+
+    public ApiHolderUtil(final boolean isAndroidApi, @Nullable OkHttpClient client, @Nullable Retrofit retrofit) {
+        this.isAndroidApi = isAndroidApi;
+        this.client = client != null ? client : getClient();
         this.retrofit = retrofit != null ? retrofit : getRetrofit(this.client);
+    }
+
+    protected OkHttpClient getClient() {
+        return new OkHttpClient();
     }
 
     protected Retrofit getRetrofit(@NonNull OkHttpClient client) {
@@ -45,28 +54,41 @@ public class ApiHolderUtil {
                 .build();
     }
 
-    public <API_HOLDER> API_HOLDER createHolderApi(@NonNull Class<API_HOLDER> apiHolder, @NonNull List<PartApi> partApis, final boolean android) {
-        for (PartApi part : partApis) {
-            updatePartApi(part.baseUrl, part.api);
+    public <HOLDER> HOLDER createHolderApi(@NonNull Class<HOLDER> apiHolder) {
+        Class<?>[] partApis = apiHolder.getInterfaces();
+        for (Class api : partApis) {
+            updateApi(api);
         }
-        return createHolderApi(apiHolder, android, holder);
+        return createHolderApi(apiHolder, apis);
     }
 
-    public <API> void updatePartApi(String baseUrl, Class<API> apiClass) {
+    /**
+     * update api with @{@link BaseUrl}
+     */
+    public <API> void updateApi(Class<API> api) {
+        if (api.isAnnotationPresent(BaseUrl.class)) {
+            BaseUrl baseUrl = api.getAnnotation(BaseUrl.class);
+            updateApi(api, baseUrl.value());
+        } else {
+            throw new IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH '%s'", api.getName(), BaseUrl.class.getName()));
+        }
+    }
+
+    public <API> void updateApi(Class<API> apiClass, String baseUrl) {
         Retrofit retrofit = this.retrofit.newBuilder().baseUrl(baseUrl).build();
-        holder.put(apiClass, retrofit.create(apiClass));
+        apis.put(apiClass, retrofit.create(apiClass));
     }
 
     /**
      * hold all api in one
      */
-    protected <API_HOLDER> API_HOLDER createHolderApi(Class<API_HOLDER> apiHolder, final boolean android, final Map<Class, Object> holder) {
-        return (API_HOLDER) Proxy.newProxyInstance(apiHolder.getClassLoader(), new Class<?>[]{apiHolder}, new InvocationHandler() {
+    protected <HOLDER> HOLDER createHolderApi(Class<HOLDER> apiHolder, final Map<Class, Object> apis) {
+        return (HOLDER) Proxy.newProxyInstance(apiHolder.getClassLoader(), new Class<?>[]{apiHolder}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Object api = holder.get(method.getDeclaringClass());
+                Object api = apis.get(method.getDeclaringClass());
                 Object result = method.invoke(api, args);
-                if (android) return setAndroidSchedulers(result);
+                if (isAndroidApi) return setAndroidSchedulers(result);
                 return result;
             }
         });
