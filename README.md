@@ -1,4 +1,8 @@
-# ApiHolder [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder)
+# ApiHolder（聚合API） [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder)
+## 功能
+1. 聚合所有接口到一个类，再也不用为区分接口在哪个类而烦恼了！
+2. 给接口设置默认AndroidSchedulers，不用每次都写。
+## 使用方法
 ```
     private fun initHoderApi() {
         val util = ApiHolderUtil()
@@ -12,7 +16,8 @@
     }
 
 ```
-
+## 定义接口
+在一个类中定义所有接口，方便查找和维护
 ```
     interface ApiHolder : ApiA, ApiB, ApiC
 
