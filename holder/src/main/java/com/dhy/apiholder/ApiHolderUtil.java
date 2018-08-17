@@ -1,7 +1,6 @@
 package com.dhy.apiholder;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -23,20 +22,17 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiHolderUtil {
-    @NonNull
     private final Retrofit retrofit;
-    @NonNull
-    protected final Map<Class, Object> apis = new HashMap<>();
-    protected final boolean isAndroidApi;
+    private final Map<Class, Object> apis = new HashMap<>();
+    private final boolean isAndroidApi;
 
     public ApiHolderUtil() {
-        this(true, null, null);
+        this.isAndroidApi = isAndroidApi();
+        this.retrofit = getRetrofit(getClient());
     }
 
-    public ApiHolderUtil(final boolean isAndroidApi, @Nullable OkHttpClient client, @Nullable Retrofit retrofit) {
-        this.isAndroidApi = isAndroidApi;
-        OkHttpClient okHttpClient = client != null ? client : getClient();
-        this.retrofit = retrofit != null ? retrofit : getRetrofit(okHttpClient);
+    protected boolean isAndroidApi() {
+        return true;
     }
 
     protected OkHttpClient getClient() {
@@ -57,7 +53,7 @@ public class ApiHolderUtil {
         for (Class api : partApis) {
             updateApi(api);
         }
-        return createHolderApi(apiHolder, apis);
+        return createHolderApi(apis, apiHolder);
     }
 
     /**
@@ -88,7 +84,7 @@ public class ApiHolderUtil {
     /**
      * hold all api in one
      */
-    private <HOLDER> HOLDER createHolderApi(@NonNull Class<HOLDER> apiHolder, @NonNull final Map<Class, Object> apis) {
+    private <HOLDER> HOLDER createHolderApi(@NonNull final Map<Class, Object> apis, @NonNull Class<HOLDER> apiHolder) {
         return (HOLDER) Proxy.newProxyInstance(apiHolder.getClassLoader(), new Class[]{apiHolder}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
