@@ -22,14 +22,9 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiHolderUtil {
-    private final Retrofit retrofit;
+    private Retrofit retrofit;
+    private boolean isAndroidApi;
     private final Map<Class, Object> apis = new HashMap<>();
-    private final boolean isAndroidApi;
-
-    public ApiHolderUtil() {
-        this.isAndroidApi = isAndroidApi();
-        this.retrofit = getRetrofit(getClient());
-    }
 
     protected boolean isAndroidApi() {
         return true;
@@ -48,7 +43,13 @@ public class ApiHolderUtil {
                 .build();
     }
 
+    private void init() {
+        this.isAndroidApi = isAndroidApi();
+        this.retrofit = getRetrofit(getClient());
+    }
+
     public final <HOLDER> HOLDER createHolderApi(@NonNull Class<HOLDER> apiHolder) {
+        init();
         Class[] partApis = apiHolder.getInterfaces();
         for (Class api : partApis) {
             updateApi(api);
