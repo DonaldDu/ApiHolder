@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 publish {
-    userOrg = 'userOrg'
-    groupId = 'groupId'
-    artifactId = 'artifactId'
-    publishVersion = 'publishVersion'
+    userOrg = 'DonaldDu'
+    groupId = 'com.github.DonaldDu'
+    artifactId = 'ApiHolder'
+    publishVersion = '0.9.4'
     desc = 'desc'
     website = 'website'
 }
