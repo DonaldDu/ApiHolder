@@ -25,6 +25,7 @@ public class ApiHolderUtil {
     private Retrofit retrofit;
     private boolean isAndroidApi;
     private final Map<Class, Object> apis = new HashMap<>();
+    private final Map<Class, String> baseUrls = new HashMap<>();
 
     protected boolean isAndroidApi() {
         return true;
@@ -67,6 +68,12 @@ public class ApiHolderUtil {
     public final <API> void updateApi(@NonNull Class<API> apiClass, @NonNull String baseUrl) {
         Retrofit retrofit = this.retrofit.newBuilder().baseUrl(baseUrl).build();
         apis.put(apiClass, retrofit.create(apiClass));
+        baseUrls.put(apiClass, baseUrl);
+    }
+
+    @NonNull
+    public <API, HOLDER extends API> String getCurrentBaseUrl(@NonNull Class<HOLDER> holder, @NonNull Class<API> api) {
+        return baseUrls.get(api);
     }
 
     /**
