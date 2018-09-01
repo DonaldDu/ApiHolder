@@ -1,6 +1,7 @@
 package com.dhy.apiholder.demo
 
 import com.dhy.apiholder.BaseUrl
+import com.dhy.apiholder.Timeout
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import retrofit2.http.GET
@@ -26,4 +27,11 @@ interface ApiB {
 interface ApiC {
     @GET("user/loginWithScanCode")
     fun methodC(@Query("id") id: Int): Observable<ResponseBody>
+}
+
+@BaseUrl("https://www.c.com/")
+@Timeout(read = 100)
+interface Apid {
+    @GET("user/loginWithScanCode")
+    fun methodd(@Query("id") id: Int): Observable<ResponseBody>
 }

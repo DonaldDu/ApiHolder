@@ -66,9 +66,28 @@ public class ApiHolderUtil {
     }
 
     public final <API> void updateApi(@NonNull Class<API> apiClass, @NonNull String baseUrl) {
-        Retrofit retrofit = this.retrofit.newBuilder().baseUrl(baseUrl).build();
+        Retrofit.Builder retrofitBuilder = retrofit.newBuilder();
+        initTimeout(retrofitBuilder, apiClass);
+        Retrofit retrofit = retrofitBuilder.baseUrl(baseUrl).build();
         apis.put(apiClass, retrofit.create(apiClass));
         baseUrls.put(apiClass, baseUrl);
+    }
+
+    private <API> void initTimeout(Retrofit.Builder retrofitBuilder, @NonNull Class<API> apiClass) {
+        if (apiClass.isAnnotationPresent(Timeout.class)) {
+            Timeout timeout = apiClass.getAnnotation(Timeout.class);
+            OkHttpClient.Builder builder = getClient().newBuilder();
+            if (timeout.connect() > 0) {
+                builder.connectTimeout(timeout.connect(), timeout.timeUnit());
+            }
+            if (timeout.read() > 0) {
+                builder.readTimeout(timeout.read(), timeout.timeUnit());
+            }
+            if (timeout.write() > 0) {
+                builder.writeTimeout(timeout.write(), timeout.timeUnit());
+            }
+            retrofitBuilder.client(builder.build());
+        }
     }
 
     @NonNull
