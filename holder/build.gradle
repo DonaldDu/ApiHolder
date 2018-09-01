@@ -4,7 +4,7 @@ publish {
     userOrg = 'DonaldDu'
     groupId = 'com.github.DonaldDu'
     artifactId = 'ApiHolder'
-    publishVersion = '0.9.5'
+    publishVersion = '0.9.6'
     desc = 'desc'
     website = 'website'
 }
