@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
 
-interface ApiHolder : ApiA, ApiB, ApiC
+interface ApiHolder : ApiA, ApiB, ApiC, ApiD
 
 @BaseUrl("https://www.a.com/")
 interface ApiA {
@@ -31,7 +31,7 @@ interface ApiC {
 
 @BaseUrl("https://www.c.com/")
 @Timeout(read = 100)
-interface Apid {
+interface ApiD {
     @GET("user/loginWithScanCode")
-    fun methodd(@Query("id") id: Int): Observable<ResponseBody>
+    fun methodD(@Query("id") id: Int): Observable<ResponseBody>
 }

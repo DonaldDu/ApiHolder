@@ -26,9 +26,14 @@ public class ApiHolderUtil {
     private boolean isAndroidApi;
     private final Map<Class, Object> apis = new HashMap<>();
     private final Map<Class, String> baseUrls = new HashMap<>();
+    private AutoCmdUtil autoCmdUtil;
 
     protected boolean isAndroidApi() {
         return true;
+    }
+
+    protected boolean validateEagerly() {
+        return false;
     }
 
     protected OkHttpClient getClient() {
@@ -37,6 +42,7 @@ public class ApiHolderUtil {
 
     protected Retrofit getRetrofit(@NonNull OkHttpClient client) {
         return new Retrofit.Builder()
+                .validateEagerly(validateEagerly())
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .baseUrl("http://www.demo.com/")
@@ -47,6 +53,11 @@ public class ApiHolderUtil {
     private void init() {
         this.isAndroidApi = isAndroidApi();
         this.retrofit = getRetrofit(getClient());
+        try {
+            autoCmdUtil = new AutoCmdUtil();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public final <HOLDER> HOLDER createHolderApi(@NonNull Class<HOLDER> apiHolder) {
@@ -71,6 +82,14 @@ public class ApiHolderUtil {
         Retrofit retrofit = retrofitBuilder.baseUrl(baseUrl).build();
         apis.put(apiClass, retrofit.create(apiClass));
         baseUrls.put(apiClass, baseUrl);
+
+        if (validateEagerly() && autoCmdUtil != null) {
+            try {
+                autoCmdUtil.initHeaders(retrofit);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private <API> void initTimeout(Retrofit.Builder retrofitBuilder, @NonNull Class<API> apiClass) {
