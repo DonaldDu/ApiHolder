@@ -1,6 +1,8 @@
 package com.dhy.apiholder;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -73,12 +75,13 @@ public class ApiHolderUtil {
      * update api with @{@link BaseUrl}
      */
     public final <API> void updateApi(@NonNull Class<API> api) {
-        updateApi(api, getBaseUrl(api));
+        updateApi(api, null);
     }
 
-    public final <API> void updateApi(@NonNull Class<API> apiClass, @NonNull String baseUrl) {
+    public final <API> void updateApi(@NonNull Class<API> apiClass, @Nullable String baseUrl) {
         Retrofit.Builder retrofitBuilder = retrofit.newBuilder();
         initTimeout(retrofitBuilder, apiClass);
+        baseUrl = getBaseUrl(apiClass, baseUrl);
         Retrofit retrofit = retrofitBuilder.baseUrl(baseUrl).build();
         apis.put(apiClass, retrofit.create(apiClass));
         baseUrls.put(apiClass, baseUrl);
@@ -110,21 +113,61 @@ public class ApiHolderUtil {
     }
 
     @NonNull
-    public <API, HOLDER extends API> String getCurrentBaseUrl(@NonNull Class<HOLDER> holder, @NonNull Class<API> api) {
+    public <API> String getCurrentBaseUrl(@NonNull Class<API> api) {
         return baseUrls.get(api);
     }
 
     /**
-     * get url from with @{@link BaseUrl}
+     * get full url with append
      */
-    @NonNull
-    public static <API> String getBaseUrl(@NonNull Class<API> api) {
+    public static <API> String getBaseUrl(@NonNull Class<API> api, @Nullable String newBaseUrl) {
         if (api.isAnnotationPresent(BaseUrl.class)) {
             BaseUrl baseUrl = api.getAnnotation(BaseUrl.class);
-            return baseUrl.value();
+            String url = newBaseUrl != null ? newBaseUrl : baseUrl.value();
+            if (!url.endsWith("/")) url += "/";
+
+            String append = baseUrl.append();
+            if (!TextUtils.isEmpty(append)) {
+                if (append.startsWith("/")) append = append.substring(1);
+                url = url + append;
+            }
+            if (!url.endsWith("/")) url += "/";
+            return url;
         } else {
             throw new IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH '%s'", api.getName(), BaseUrl.class.getName()));
         }
+    }
+
+    /**
+     * eg: BaseUrl(value="https://www.a.com/", append = "apiA") => "https://www.a.com"
+     *
+     * @return current url without append & '/'
+     */
+    public <API> String getCurrentUrlWithoutAppend(@NonNull Class<API> api) {
+        if (api.isAnnotationPresent(BaseUrl.class)) {
+            BaseUrl baseUrl = api.getAnnotation(BaseUrl.class);
+            String append = baseUrl.append();
+            String url = getCurrentBaseUrl(api);
+            if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+            if (TextUtils.isEmpty(append)) {
+                return url;
+            } else {
+                if (append.endsWith("/")) append = append.substring(0, append.length() - 1);
+                url = url.substring(0, url.length() - append.length());
+                if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+                return url;
+            }
+        } else {
+            throw new IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH '%s'", api.getName(), BaseUrl.class.getName()));
+        }
+    }
+
+    /**
+     * get url from with @{@link BaseUrl}  with append
+     */
+    @NonNull
+    public static <API> String getBaseUrl(@NonNull Class<API> api) {
+        return getBaseUrl(api, null);
     }
 
     /**

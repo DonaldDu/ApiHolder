@@ -10,7 +10,7 @@ import retrofit2.http.Query
 
 interface ApiHolder : ApiA, ApiB, ApiC, ApiD
 
-@BaseUrl("https://www.a.com/")
+@BaseUrl("https://www.a.com/", append = "apiA")
 interface ApiA {
     @GET("user/loginWithScanCode")
     fun methodA(@Query("id") id: Int): Observable<ResponseBody>

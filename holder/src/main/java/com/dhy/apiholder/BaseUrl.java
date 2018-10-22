@@ -10,4 +10,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface BaseUrl {
     String value();
+
+    /**
+     * append to value, auto check separator of '/'
+     */
+    String append() default "";
 }
