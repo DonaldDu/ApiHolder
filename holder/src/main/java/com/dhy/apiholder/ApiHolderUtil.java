@@ -11,11 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
-import io.reactivex.SingleTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
@@ -190,23 +186,13 @@ public class ApiHolderUtil {
 
     protected Object setAndroidSchedulers(@NonNull Object result) {
         if (result instanceof Single) {
-            return ((Single) result).compose(new SingleTransformer() {
-                @Override
-                public SingleSource apply(Single upstream) {
-                    return upstream.subscribeOn(Schedulers.io())
-                            .unsubscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread());
-                }
-            });
+            return ((Single) result).subscribeOn(Schedulers.io())
+                    .unsubscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
         } else if (result instanceof Observable) {
-            return ((Observable) result).compose(new ObservableTransformer() {
-                @Override
-                public ObservableSource apply(Observable upstream) {
-                    return upstream.subscribeOn(Schedulers.io())
-                            .unsubscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread());
-                }
-            });
+            return ((Observable) result).subscribeOn(Schedulers.io())
+                    .unsubscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
         }
         return result;
     }
