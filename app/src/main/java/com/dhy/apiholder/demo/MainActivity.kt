@@ -13,13 +13,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initHoderApi() {
-        val util = ApiHolderUtil()
-        val api = util.createHolderApi(ApiHolder::class.java)
+        val util = ApiHolderUtil(ApiHolder::class)
+        val api = util.api
         api.methodA(1)
         api.methodB(1)
         api.methodC(1)
 
         //update api when needed
-        util.updateApi(ApiA::class.java, "https://www.a2.com/")
+        util.updateApi(ApiA::class, "https://www.a2.com/")
     }
 }

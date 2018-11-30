@@ -1,10 +1,11 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'com.novoda.bintray-release'
 publish {
     userOrg = 'DonaldDu'
     groupId = 'com.github.DonaldDu'
     artifactId = 'ApiHolder'
-    publishVersion = '1.0.2'
+    publishVersion = '1.0.3'
     desc = 'desc'
     website = 'website'
 }
@@ -41,4 +42,5 @@ dependencies {
     compileOnly 'com.squareup.retrofit2:retrofit:2.4.0'
     compileOnly 'com.squareup.retrofit2:converter-gson:2.4.0'
     compileOnly 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
