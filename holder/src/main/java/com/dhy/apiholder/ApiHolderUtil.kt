@@ -1,6 +1,5 @@
 package com.dhy.apiholder
 
-import android.text.TextUtils
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -117,7 +116,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>) {
             var append = baseUrl.append
             var url = getUsingBaseUrl(api)
             url = url.trim("/")
-            return if (TextUtils.isEmpty(append)) {
+            return if (append.isEmpty()) {
                 url
             } else {
                 append = append.trim("/")
@@ -162,7 +161,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>) {
                 if (!url.endsWith("/")) url += "/"
 
                 var append = baseUrl.append
-                if (!TextUtils.isEmpty(append)) {
+                if (append.isNotEmpty()) {
                     if (append.startsWith("/")) append = append.substring(1)
                     url += append
                 }
