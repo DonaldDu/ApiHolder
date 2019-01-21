@@ -10,7 +10,7 @@ publish {
     website = 'website'
 }
 android {
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.3'
     compileSdkVersion 27
     defaultConfig {
         minSdkVersion 15
