@@ -15,6 +15,7 @@ import retrofit2.http.PUT;
 
 public class AutoCmdUtil {
     private Field serviceMethodCacheF;
+    private Field requestFactoryF;
     private Field headersF;
     @SuppressWarnings("FieldCanBeLocal")
     private final String HEADER_CMD = "cmd";
@@ -27,8 +28,12 @@ public class AutoCmdUtil {
         serviceMethodCacheF = Retrofit.class.getDeclaredField("serviceMethodCache");
         serviceMethodCacheF.setAccessible(true);
 
-        Class<?> ServiceMethod = Class.forName("retrofit2.ServiceMethod");
-        headersF = ServiceMethod.getDeclaredField("headers");
+        Class<?> HttpServiceMethod = Class.forName("retrofit2.HttpServiceMethod");
+        requestFactoryF = HttpServiceMethod.getDeclaredField("requestFactory");
+        requestFactoryF.setAccessible(true);
+
+        Class<?> RequestFactory = Class.forName("retrofit2.RequestFactory");
+        headersF = RequestFactory.getDeclaredField("headers");
         headersF.setAccessible(true);
     }
 
@@ -37,7 +42,8 @@ public class AutoCmdUtil {
         Set<Method> methods = serviceMethodCache.keySet();
         for (Method method : methods) {
             Object serviceMethodInstance = serviceMethodCache.get(method);
-            initHeaders(method, serviceMethodInstance);
+            Object requestFactory = requestFactoryF.get(serviceMethodInstance);
+            initHeaders(method, requestFactory);
         }
     }
 

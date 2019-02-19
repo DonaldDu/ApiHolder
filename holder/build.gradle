@@ -5,7 +5,7 @@ publish {
     userOrg = 'DonaldDu'
     groupId = 'com.github.DonaldDu'
     artifactId = 'ApiHolder'
-    publishVersion = '1.0.4'
+    publishVersion = '1.0.6'
     desc = 'desc'
     website = 'website'
 }
@@ -36,7 +36,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     compileOnly 'com.android.support:appcompat-v7:27.1.1'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    api 'io.reactivex.rxjava2:rxandroid:2.1.1'
     api 'com.squareup.retrofit2:retrofit:2.5.0'
     api 'com.squareup.retrofit2:converter-gson:2.5.0'
     api 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'

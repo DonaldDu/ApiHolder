@@ -77,7 +77,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>) {
         if (validateEagerly() && autoCmdUtil != null) {
             try {
                 autoCmdUtil!!.initHeaders(retrofit)
-            } catch (e: IllegalAccessException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
