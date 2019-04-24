@@ -15,4 +15,9 @@ public @interface BaseUrl {
      * append to value, auto check separator of '/'
      */
     String append() default "";
+
+    /**
+     * marke as root api for  {@link ApiHolderUtil#isRelease()}
+     */
+    boolean rootApi() default false;
 }
