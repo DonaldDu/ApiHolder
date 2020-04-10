@@ -10,21 +10,39 @@ import java.net.URL
 import kotlin.reflect.KClass
 
 open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, private val validateEagerly: Boolean = false) {
-    private val mRetrofit: Retrofit by lazy { getRetrofit(okHttpClient) }
+    private var mRetrofit: Retrofit? = null
+    private val retrofit: Retrofit
+        get() {
+            if (mRetrofit == null) mRetrofit = getRetrofit(okHttpClient)
+            return mRetrofit!!
+        }
+
+    private var mOkHttpClient: OkHttpClient? = null
+    private val okHttpClient: OkHttpClient
+        get() {
+            if (mOkHttpClient == null) mOkHttpClient = getClient()
+            return mOkHttpClient!!
+        }
+
+    val api: HOLDER
+        get() {
+            return createHolderApi(holder)
+        }
+
     private val apis: MutableMap<Class<*>, Any> = mutableMapOf()
     private val baseUrls: MutableMap<Class<*>, String> = mutableMapOf()
-    private val autoCmdUtil: AutoCmdUtil? by lazy {
-        if (validateEagerly) {
-            return@lazy try {
-                AutoCmdUtil()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        } else null
-    }
-    private val okHttpClient: OkHttpClient by lazy { getClient() }
-    val api: HOLDER by lazy { createHolderApi(holder) }
+    private var _autoCmdUtil: AutoCmdUtil? = null
+    private val autoCmdUtil: AutoCmdUtil?
+        get() {
+            if (_autoCmdUtil == null)
+                _autoCmdUtil = try {
+                    AutoCmdUtil()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            return _autoCmdUtil
+        }
 
     protected open fun getClient(): OkHttpClient = OkHttpClient()
     protected open fun getGsonConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
@@ -40,10 +58,16 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
 
     private fun createHolderApi(apiHolder: KClass<HOLDER>): HOLDER {
         val partApis = apiHolder.java.interfaces
-        for (api in partApis) {
-            updateApi(api)
+        for (apiClass in partApis) {
+            val api = apis[apiClass]
+            if (api == null) updateApi(apiClass)
         }
+        onCreateHolderApi()
         return createHolderApi(apis, apiHolder.java)
+    }
+
+    open fun onCreateHolderApi() {
+
     }
 
     /**
@@ -64,7 +88,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
     }
 
     private fun updateApi(apiClass: Class<*>, newDomain: String? = null) {
-        val retrofitBuilder = mRetrofit.newBuilder()
+        val retrofitBuilder = retrofit.newBuilder()
         initTimeout(retrofitBuilder, apiClass)
         val url = getBaseUrl(apiClass, newDomain).toString()
         val retrofit = retrofitBuilder.baseUrl(url).build()
@@ -134,9 +158,8 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
      * @param release release or current using full url
      * */
     fun getBaseUrl(api: KClass<*>, release: Boolean): URL {
-        if (baseUrls.isEmpty()) throw IllegalStateException("you should call ApiHolderUtil.api before ApiHolderUtil.getBaseUrl(api: KClass<*>, release = false) for current baseUrl")
-        return if (!release) URL(baseUrls[api.java]!!)
-        else getBaseUrl(api.java)
+        return if (baseUrls.isEmpty() || release) getBaseUrl(api.java)
+        else URL(baseUrls[api.java]!!)
     }
 
     fun isRelease(): Boolean {
@@ -152,8 +175,6 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
     }
 
     companion object {
-
-
         @JvmStatic
         fun isRelease(apiUtil: ApiHolderUtil<*>): Boolean {
             return isRelease(apiUtil)
