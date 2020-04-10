@@ -1,1 +1,0 @@
--keepclasseswithmembers class retrofit2.Retrofit {serviceMethodCache}
