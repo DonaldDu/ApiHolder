@@ -31,19 +31,6 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
 
     private val apis: MutableMap<Class<*>, Any> = mutableMapOf()
     private val baseUrls: MutableMap<Class<*>, String> = mutableMapOf()
-    private var _autoCmdUtil: AutoCmdUtil? = null
-    private val autoCmdUtil: AutoCmdUtil?
-        get() {
-            if (_autoCmdUtil == null)
-                _autoCmdUtil = try {
-                    AutoCmdUtil()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            return _autoCmdUtil
-        }
-
     protected open fun getClient(): OkHttpClient = OkHttpClient()
     protected open fun getGsonConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
     protected open fun getRetrofit(client: OkHttpClient): Retrofit {
@@ -94,14 +81,6 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         val retrofit = retrofitBuilder.baseUrl(url).build()
         apis[apiClass] = retrofit.create(apiClass) as Any
         baseUrls[apiClass] = url
-
-        if (validateEagerly && autoCmdUtil != null) {
-            try {
-                autoCmdUtil!!.initHeaders(retrofit)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
     }
 
     private fun initTimeout(retrofitBuilder: Retrofit.Builder, apiClass: Class<*>) {
