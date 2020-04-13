@@ -46,11 +46,10 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     compileOnly 'com.android.support:appcompat-v7:27.1.1'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    api('com.squareup.retrofit2:retrofit:2.7.2') {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-    }
+
     api 'com.squareup.okhttp3:okhttp:4.4.1'
-    api 'com.squareup.retrofit2:converter-gson:2.7.2'
-    api 'com.squareup.retrofit2:adapter-rxjava2:2.6.2'
+    api "com.squareup.retrofit2:retrofit:$retrofitV"
+    api "com.squareup.retrofit2:converter-gson:$retrofitV"
+    api "com.squareup.retrofit2:adapter-rxjava2:$retrofitV"
+    api 'io.reactivex.rxjava2:rxjava:2.2.19'
 }
