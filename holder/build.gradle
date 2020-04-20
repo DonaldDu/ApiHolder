@@ -9,6 +9,7 @@ publish {
     desc = 'desc'
     website = 'website'
 }
+if (project.hasProperty('PRIVATE_NEXUS_REPOSITORY')) publishToNexus()
 android {
     buildToolsVersion '28.0.3'
     compileSdkVersion 27
