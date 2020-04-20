@@ -138,7 +138,11 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
      * */
     fun getBaseUrl(api: KClass<*>, release: Boolean): URL {
         return if (baseUrls.isEmpty() || release) getBaseUrl(api.java)
-        else URL(baseUrls[api.java]!!)
+        else {
+            val url = baseUrls[api.java]
+            if (url != null) URL(url)
+            else getBaseUrl(api.java)
+        }
     }
 
     fun isRelease(): Boolean {
