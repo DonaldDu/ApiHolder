@@ -67,7 +67,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
             apis.forEach {
                 updateApi(it, newDomain)
             }
-        } else throw  IllegalArgumentException("not api found for domian:$releaseDomain")
+        }
     }
 
     fun updateApi(apiClass: KClass<*>, newDomain: String? = null) {

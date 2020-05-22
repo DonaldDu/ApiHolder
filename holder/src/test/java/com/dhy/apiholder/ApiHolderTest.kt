@@ -36,7 +36,7 @@ class ApiHolderTest {
         } catch (e: Exception) {
             true
         }
-        assertEquals("errorRelease should be error", true, error)
+        assertEquals("errorRelease should be error", false, error)
     }
 
     @Test
