@@ -49,6 +49,12 @@ class ApiHolderTest {
         testUsingDomain(domain, "/a/")
     }
 
+    @Test
+    fun showBaseUrl() {
+        val baseUrl = ApiA::class.java.getAnnotation(BaseUrl::class.java)!!
+        println(baseUrl.value)
+    }
+
     private fun testUsingDomain(domain: String, append: String) {
         val url = domain.appendPath(append)
         val reg = "/?$append/?\$".toRegex()

@@ -62,7 +62,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
      * */
     fun updateApi(releaseDomain: String, newDomain: String) {
         val release = releaseDomain.appendPath()
-        val apis = holder.java.interfaces.filter { it.getBaseUrl()!!.value.appendPath() == release }
+        val apis = holder.java.interfaces.filter { getAnnotationUrl(it).value.appendPath() == release }
         if (apis.isNotEmpty()) {
             apis.forEach {
                 updateApi(it, newDomain)
@@ -85,7 +85,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
 
     private fun initTimeout(retrofitBuilder: Retrofit.Builder, apiClass: Class<*>) {
         if (apiClass.isAnnotationPresent(Timeout::class.java)) {
-            val timeout = apiClass.getAnnotation<Timeout>(Timeout::class.java)
+            val timeout = apiClass.getAnnotation(Timeout::class.java)!!
             val builder = okHttpClient.newBuilder()
             if (timeout.connect > 0) {
                 builder.connectTimeout(timeout.connect, timeout.timeUnit)
@@ -124,13 +124,9 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
      */
     fun getUsingDomain(api: KClass<*>): String {
         val cls = api.java
-        if (cls.isAnnotationPresent(BaseUrl::class.java)) {
-            val url = getBaseUrl(cls.kotlin, false).toString()
-            val append = cls.getBaseUrl()!!.append
-            return url.replace("/?$append/?\$".toRegex(), "")
-        } else {
-            throw IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH '%s'", cls.name, BaseUrl::class.java.name))
-        }
+        val url = getBaseUrl(cls.kotlin, false).toString()
+        val append = getAnnotationUrl(cls).append
+        return url.replace("/?$append/?\$".toRegex(), "")
     }
 
     /**
@@ -153,43 +149,50 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
     }
 
     fun getRootApi(): KClass<*> {
-        return holder.java.interfaces.find { it.getBaseUrl()!!.rootApi }?.kotlin
+        return holder.java.interfaces.find { getAnnotationUrl(it).rootApi }?.kotlin
                 ?: throw IllegalArgumentException("you should marke one api with com.dhy.apiholder.BaseUrl.rootApi first")
     }
 
-    companion object {
-        @JvmStatic
-        fun isRelease(apiUtil: ApiHolderUtil<*>): Boolean {
-            return isRelease(apiUtil)
-        }
+    /**
+     * get full url with append, end with "/"
+     */
 
-        /**
-         * get full url with append, end with "/"
-         */
-        @JvmStatic
-        fun getBaseUrl(api: KClass<*>, newDomain: String? = null): URL {
-            return getBaseUrl(api.java, newDomain)
-        }
+    fun getBaseUrl(api: KClass<*>, newDomain: String? = null): URL {
+        return getBaseUrl(api.java, newDomain)
+    }
 
-        /**
-         * get full url with append, end with "/"
-         */
-        @JvmStatic
-        fun getBaseUrl(api: Class<*>, newDomain: String? = null): URL {
-            if (api.isAnnotationPresent(BaseUrl::class.java)) {
-                val baseUrl = api.getBaseUrl()!!
-                val domain = newDomain ?: baseUrl.value
-                return URL(domain.appendPath(baseUrl.append))
+    /**
+     * get full url with append, end with "/"
+     */
+
+    fun getBaseUrl(api: Class<*>, newDomain: String? = null): URL {
+        val baseUrl = getAnnotationUrl(api)
+        val domain = newDomain ?: baseUrl.value
+        return URL(domain.appendPath(baseUrl.append))
+    }
+
+    private val annotations: MutableMap<Class<*>, BaseUrlData> = mutableMapOf()
+    private fun getAnnotationUrl(cls: Class<*>, annotationBuffer: MutableMap<Class<*>, BaseUrlData> = annotations): BaseUrlData {
+        val buffer = annotationBuffer[cls]
+        return if (buffer != null) buffer
+        else {
+            val baseUrl = if (cls.isAnnotationPresent(BaseUrl::class.java)) {
+                val data = cls.getAnnotation(BaseUrl::class.java)!!
+                BaseUrlData(data.value, data.append, data.rootApi)
             } else {
-                throw IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH '%s'", api.name, BaseUrl::class.java.name))
+                getEnumBaseUrl(cls)
             }
+            annotationBuffer[cls] = baseUrl
+            baseUrl
         }
+    }
+
+    open fun getEnumBaseUrl(cls: Class<*>): BaseUrlData {
+        throw IllegalArgumentException("not supported yet")
     }
 }
 
-fun Class<*>.getBaseUrl(): BaseUrl? {
-    return getAnnotation(BaseUrl::class.java)
-}
+data class BaseUrlData(val value: String, val append: String, val rootApi: Boolean)
 
 fun String.trim(tail: String): String {
     return if (endsWith(tail)) {
