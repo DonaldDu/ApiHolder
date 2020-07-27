@@ -206,5 +206,5 @@ fun String.trim(tail: String): String {
  * */
 fun String.appendPath(path: String? = null): String {
     val url = this + "/" + (path ?: "") + "/"
-    return url.replace("([^:])/{2,}".toRegex(), "$1/")
+    return url.replace("([^:/])/{2,}".toRegex(), "$1/")
 }
