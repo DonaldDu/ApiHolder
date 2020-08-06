@@ -180,14 +180,14 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
                 val data = cls.getAnnotation(BaseUrl::class.java)!!
                 BaseUrlData(data.value, data.append, data.rootApi)
             } else {
-                getEnumBaseUrl(cls)
+                getUserBaseUrl(cls)
             }
             annotationBuffer[cls] = baseUrl
             baseUrl
         }
     }
 
-    open fun getEnumBaseUrl(cls: Class<*>): BaseUrlData {
+    open fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
         throw IllegalArgumentException("not supported yet")
     }
 }

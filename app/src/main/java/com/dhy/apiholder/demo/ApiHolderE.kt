@@ -22,7 +22,7 @@ interface PushApi {
 }
 
 class ApiUtil : ApiHolderUtil<ApiHolderE>(ApiHolderE::class) {
-    override fun getEnumBaseUrl(cls: Class<*>): BaseUrlData {
+    override fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
         val baseUrl = cls.getAnnotation(BaseUrl::class.java)
         return if (baseUrl != null) BaseUrlData(baseUrl.value.release, baseUrl.append, baseUrl.rootApi)
         else {
