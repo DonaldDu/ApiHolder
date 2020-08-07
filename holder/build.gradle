@@ -51,6 +51,6 @@ dependencies {
     api 'com.squareup.okhttp3:okhttp:4.7.2'
     api "com.squareup.retrofit2:retrofit:$retrofitV"
     api "com.squareup.retrofit2:converter-gson:$retrofitV"
-    api "com.squareup.retrofit2:adapter-rxjava2:$retrofitV"
-    api 'io.reactivex.rxjava2:rxjava:2.2.19'
+    api "com.squareup.retrofit2:adapter-rxjava3:$retrofitV"
+    api 'io.reactivex.rxjava3:rxandroid:3.0.0'
 }

@@ -2,7 +2,7 @@ package com.dhy.apiholder.demo
 
 import com.dhy.apiholder.BaseUrl
 import com.dhy.apiholder.Timeout
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import okhttp3.ResponseBody
 import retrofit2.http.GET
 import retrofit2.http.Headers
