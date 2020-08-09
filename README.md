@@ -1,4 +1,4 @@
-# [ApiHolder](https://github.com/DonaldDu/ApiHolder) [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder)
+# ApiHolder [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder)
 # 现状
 Android项目如果是多服务端接口时，一般怎么弄呢？
 
