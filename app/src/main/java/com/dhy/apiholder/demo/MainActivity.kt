@@ -1,25 +1,44 @@
 package com.dhy.apiholder.demo
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.dhy.apiholder.ApiHolderUtil
+import com.dhy.apiholder.demo.ApiUtil.Companion.api
+import com.dhy.apiholder.demo.ApiUtil.Companion.apiUtil
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initHoderApi()
+        btA.setOnClickListener {
+            api.methodA(1).subscribe({
+                showMsg("onNext")
+            }, {
+                it.printStackTrace()
+                showMsg(it.message ?: "empty error")
+            }, {
+                showMsg("onComplete")
+            })
+        }
+        btB.setOnClickListener {
+            api.methodB(1).subscribe({
+                showMsg("onNext")
+            }, {
+                it.printStackTrace()
+                showMsg(it.message ?: "empty error")
+            })
+        }
+        clearLog.setOnClickListener {
+            tvLog.text = ""
+        }
+        //update api when needed
+        apiUtil.updateApi(ApiA::class, "https://www.testA.com/")
     }
 
-    private fun initHoderApi() {
-        val util = ApiHolderUtil(ApiHolder::class)
-        val api = util.api
-        api.methodA(1)
-        api.methodB(1)
-        api.methodC(1)
-
-        //update api when needed
-        util.updateApi(ApiA::class, "https://www.a2.com/")
+    @SuppressLint("SetTextI18n")
+    fun showMsg(msg: String) {
+        tvLog.text = "${tvLog.text}\n$msg"
     }
 }
