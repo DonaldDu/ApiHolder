@@ -1,4 +1,5 @@
 # ApiHolder [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder)
+说个题外话：买个实物工具要钱，弄个软件工具都是免费的！给个星鼓励下嘛！
 # 现状
 Android项目如果是多服务端接口时，一般怎么弄呢？
 
