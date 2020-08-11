@@ -2,7 +2,7 @@ package com.dhy.apiholder
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -10,25 +10,9 @@ import java.net.URL
 import kotlin.reflect.KClass
 
 open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, private val validateEagerly: Boolean = false) {
-    private var mRetrofit: Retrofit? = null
-    private val retrofit: Retrofit
-        get() {
-            if (mRetrofit == null) mRetrofit = getRetrofit(okHttpClient)
-            return mRetrofit!!
-        }
-
-    private var mOkHttpClient: OkHttpClient? = null
-    private val okHttpClient: OkHttpClient
-        get() {
-            if (mOkHttpClient == null) mOkHttpClient = getClient()
-            return mOkHttpClient!!
-        }
-
-    val api: HOLDER
-        get() {
-            return createHolderApi(holder)
-        }
-
+    val api: HOLDER by lazy { createHolderApi(holder) }
+    private val okHttpClient by lazy { getClient() }
+    private val retrofit by lazy { getRetrofit(okHttpClient) }
     private val apis: MutableMap<Class<*>, Any> = mutableMapOf()
     private val baseUrls: MutableMap<Class<*>, String> = mutableMapOf()
     protected open fun getClient(): OkHttpClient = OkHttpClient()
@@ -37,7 +21,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         return Retrofit.Builder()
                 .validateEagerly(validateEagerly)
                 .addConverterFactory(getGsonConverterFactory())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .baseUrl("http://www.demo.com/")
                 .client(client)
                 .build()
@@ -76,14 +60,14 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
 
     private fun updateApi(apiClass: Class<*>, newDomain: String? = null) {
         val retrofitBuilder = retrofit.newBuilder()
-        initTimeout(retrofitBuilder, apiClass)
+        retrofitBuilder.initTimeout(apiClass)
         val url = getBaseUrl(apiClass, newDomain).toString()
         val retrofit = retrofitBuilder.baseUrl(url).build()
         apis[apiClass] = retrofit.create(apiClass) as Any
         baseUrls[apiClass] = url
     }
 
-    private fun initTimeout(retrofitBuilder: Retrofit.Builder, apiClass: Class<*>) {
+    private fun Retrofit.Builder.initTimeout(apiClass: Class<*>) {
         if (apiClass.isAnnotationPresent(Timeout::class.java)) {
             val timeout = apiClass.getAnnotation(Timeout::class.java)!!
             val builder = okHttpClient.newBuilder()
@@ -96,7 +80,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
             if (timeout.write > 0) {
                 builder.writeTimeout(timeout.write, timeout.timeUnit)
             }
-            retrofitBuilder.client(builder.build())
+            client(builder.build())
         }
     }
 
@@ -180,14 +164,14 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
                 val data = cls.getAnnotation(BaseUrl::class.java)!!
                 BaseUrlData(data.value, data.append, data.rootApi)
             } else {
-                getEnumBaseUrl(cls)
+                getUserBaseUrl(cls)
             }
             annotationBuffer[cls] = baseUrl
             baseUrl
         }
     }
 
-    open fun getEnumBaseUrl(cls: Class<*>): BaseUrlData {
+    open fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
         throw IllegalArgumentException("not supported yet")
     }
 }
