@@ -1,4 +1,4 @@
-# ApiHolder [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder)
+# ApiHolder [![](https://jitpack.io/v/DonaldDu/ApiHolder.svg)](https://jitpack.io/#DonaldDu/ApiHolder) [JitPack](https://jitpack.io/#DonaldDu/ApiHolder)
 说个题外话：买个实物工具要钱，弄个软件工具都是免费的！给个星鼓励下嘛！
 # 现状
 Android项目如果是多服务端接口时，一般怎么弄呢？
@@ -119,7 +119,7 @@ class ApiUtil : ApiHolderUtil<ApiHolder>(ApiHolder::class) {
     api.methodA(1).subscribe()
     api.methodB(1).subscribe()
 ```
-# 引入依赖
+# 引入依赖 [JitPack](https://jitpack.io/#DonaldDu/ApiHolder)
 ```
 dependencies {
     implementation 'com.github.DonaldDu:ApiHolder:x.x.x'//JitPack version
