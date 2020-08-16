@@ -29,17 +29,12 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
 
     private fun createHolderApi(apiHolder: KClass<HOLDER>): HOLDER {
         val partApis = apiHolder.java.interfaces
-        for (apiClass in partApis) {
-            val api = apis[apiClass]
-            if (api == null) updateApi(apiClass)
-        }
+        for (apiClass in partApis) updateApi(apiClass)
         onCreateHolderApi()
-        return createHolderApi(apis, apiHolder.java)
+        return createHolderApi(apiHolder.java)
     }
 
-    open fun onCreateHolderApi() {
-
-    }
+    open fun onCreateHolderApi() {}
 
     /**
      * the domain end which is '/' will be ignored
@@ -59,12 +54,22 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
     }
 
     private fun updateApi(apiClass: Class<*>, newDomain: String? = null) {
+        val oldUrl = baseUrls[apiClass]
+        val newUrl = getBaseUrl(apiClass, newDomain).toString()
+        if (oldUrl != newUrl) {
+            baseUrls[apiClass] = newUrl
+            if (apis[apiClass] != null) {
+                apis[apiClass] = createApi(apiClass)
+            }
+        }
+    }
+
+    private fun createApi(apiClass: Class<*>): Any {
+        val url = baseUrls.getValue(apiClass)
         val retrofitBuilder = retrofit.newBuilder()
         retrofitBuilder.initTimeout(apiClass)
-        val url = getBaseUrl(apiClass, newDomain).toString()
         val retrofit = retrofitBuilder.baseUrl(url).build()
-        apis[apiClass] = retrofit.create(apiClass) as Any
-        baseUrls[apiClass] = url
+        return retrofit.create(apiClass)
     }
 
     private fun Retrofit.Builder.initTimeout(apiClass: Class<*>) {
@@ -84,13 +89,23 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         }
     }
 
+    private fun getSingleApi(apiClass: Class<*>): Any {
+        val api = apis[apiClass]
+        return if (api != null) api
+        else {
+            val newApi = createApi(apiClass)
+            apis[apiClass] = newApi
+            newApi
+        }
+    }
+
     /**
      * hold all api in one
      */
     @Suppress("UNCHECKED_CAST")
-    private fun createHolderApi(apis: Map<Class<*>, Any>, apiHolder: Class<HOLDER>): HOLDER {
+    private fun createHolderApi(apiHolder: Class<HOLDER>): HOLDER {
         return Proxy.newProxyInstance(apiHolder.classLoader, arrayOf<Class<*>>(apiHolder)) { _, method, args ->
-            val api = apis.getValue(method.declaringClass)
+            val api = getSingleApi(method.declaringClass)
             invokeApi(api, method, args)
         } as HOLDER
     }
