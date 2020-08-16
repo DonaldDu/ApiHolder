@@ -24,7 +24,7 @@ interface PushApi {
 class ApiUtilE : ApiHolderUtil<ApiHolderE>(ApiHolderE::class) {
     override fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
         val baseUrl = cls.getAnnotation(BaseUrl::class.java)
-        return if (baseUrl != null) BaseUrlData(baseUrl.value.release, baseUrl.append, baseUrl.rootApi)
+        return if (baseUrl != null) BaseUrlData(baseUrl.value.release, baseUrl.append)
         else {
             throw IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH 'BaseUrl'", cls.name))
         }
@@ -38,9 +38,5 @@ annotation class BaseUrl(
         /**
          * append to value, auto check separator of '/'
          */
-        val append: String = "",
-        /**
-         * marke as root api for  [ApiHolderUtil.isRelease]
-         */
-        val rootApi: Boolean = false
+        val append: String = ""
 )

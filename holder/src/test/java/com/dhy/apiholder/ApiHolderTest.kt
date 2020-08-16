@@ -3,7 +3,6 @@ package com.dhy.apiholder
 import io.reactivex.rxjava3.core.Observable
 import okhttp3.ResponseBody
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -16,7 +15,6 @@ class ApiHolderTest {
     fun testMe() {
         val api = holder.api
         api.methodA(1)
-        assertTrue(holder.isRelease())//must after api called
         holder.updateApi(DOMAIN_TESTD, "https://www.d1.com/")
         holder.updateApi(DOMAIN_TESTD, "https://www.d1.com")
 
@@ -66,7 +64,7 @@ interface ApiHolder : ApiA, ApiB, ApiC, ApiD
 
 const val DOMAIN_TESTD = "https://www.d.com"
 
-@BaseUrl("https://www.a.com/", append = "apiA", rootApi = true)
+@BaseUrl("https://www.a.com/", append = "apiA")
 interface ApiA {
     @GET("user/loginWithScanCode")
     fun methodA(@Query("id") id: Int): Observable<ResponseBody>

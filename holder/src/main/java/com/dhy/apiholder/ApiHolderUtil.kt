@@ -125,18 +125,6 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         }
     }
 
-    fun isRelease(): Boolean {
-        val rootApi = getRootApi()
-        val release = getBaseUrl(rootApi, true)
-        val url = getBaseUrl(rootApi, false)
-        return url == release
-    }
-
-    fun getRootApi(): KClass<*> {
-        return holder.java.interfaces.find { getAnnotationUrl(it).rootApi }?.kotlin
-                ?: throw IllegalArgumentException("you should marke one api with com.dhy.apiholder.BaseUrl.rootApi first")
-    }
-
     /**
      * get full url with append, end with "/"
      */
@@ -162,7 +150,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         else {
             val baseUrl = if (cls.isAnnotationPresent(BaseUrl::class.java)) {
                 val data = cls.getAnnotation(BaseUrl::class.java)!!
-                BaseUrlData(data.value, data.append, data.rootApi)
+                BaseUrlData(data.value, data.append)
             } else {
                 getUserBaseUrl(cls)
             }
@@ -176,7 +164,7 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
     }
 }
 
-data class BaseUrlData(val value: String, val append: String, val rootApi: Boolean)
+data class BaseUrlData(val value: String, val append: String)
 
 fun String.trim(tail: String): String {
     return if (endsWith(tail)) {
