@@ -40,8 +40,13 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
      * the domain end which is '/' will be ignored
      * */
     fun updateApi(releaseDomain: String, newDomain: String) {
-        val release = releaseDomain.appendPath()
-        val apis = holder.java.interfaces.filter { getAnnotationUrl(it).value.appendPath() == release }
+        val release = releaseDomain.formatEnd()
+        val news = newDomain.formatEnd()
+        val apis = holder.java.interfaces.filter {
+            val url = getAnnotationUrl(it).value.formatEnd()
+            //DynamicServer may update 'release' any time, so check 'news' also.
+            url == release || url == news
+        }
         if (apis.isNotEmpty()) {
             apis.forEach {
                 updateApi(it, newDomain)
@@ -158,8 +163,8 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         return URL(domain.appendPath(baseUrl.append))
     }
 
-    private val annotations: MutableMap<Class<*>, BaseUrlData> = mutableMapOf()
-    private fun getAnnotationUrl(cls: Class<*>, annotationBuffer: MutableMap<Class<*>, BaseUrlData> = annotations): BaseUrlData {
+    private val annotations: MutableMap<Class<*>, IBaseUrl> = mutableMapOf()
+    private fun getAnnotationUrl(cls: Class<*>, annotationBuffer: MutableMap<Class<*>, IBaseUrl> = annotations): IBaseUrl {
         val buffer = annotationBuffer[cls]
         return if (buffer != null) buffer
         else {
@@ -174,17 +179,21 @@ open class ApiHolderUtil<HOLDER : Any>(private val holder: KClass<HOLDER>, priva
         }
     }
 
-    open fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
+    open fun getUserBaseUrl(cls: Class<*>): IBaseUrl {
         throw IllegalArgumentException("not supported yet")
     }
 }
 
-data class BaseUrlData(val value: String, val append: String)
+private class BaseUrlData(override val value: String, override val append: String) : IBaseUrl
 
 fun String.trim(tail: String): String {
     return if (endsWith(tail)) {
         substring(0, length - tail.length)
     } else this
+}
+
+private fun String.formatEnd(): String {
+    return appendPath()
 }
 
 /**
