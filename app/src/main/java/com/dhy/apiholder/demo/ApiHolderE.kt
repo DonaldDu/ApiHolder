@@ -1,7 +1,7 @@
 package com.dhy.apiholder.demo
 
 import com.dhy.apiholder.ApiHolderUtil
-import com.dhy.apiholder.BaseUrlData
+import com.dhy.apiholder.IBaseUrl
 import io.reactivex.rxjava3.core.Observable
 import okhttp3.ResponseBody
 import retrofit2.http.GET
@@ -22,9 +22,9 @@ interface PushApi {
 }
 
 class ApiUtilE : ApiHolderUtil<ApiHolderE>(ApiHolderE::class) {
-    override fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
+    override fun getUserBaseUrl(cls: Class<*>): IBaseUrl {
         val baseUrl = cls.getAnnotation(BaseUrl::class.java)
-        return if (baseUrl != null) BaseUrlData(baseUrl.value.release, baseUrl.append)
+        return if (baseUrl != null) IBaseUrl(baseUrl.value.release, baseUrl.append)
         else {
             throw IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH 'BaseUrl'", cls.name))
         }
