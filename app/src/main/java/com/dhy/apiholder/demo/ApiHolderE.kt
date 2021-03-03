@@ -24,12 +24,14 @@ interface PushApi {
 class ApiUtilE : ApiHolderUtil<ApiHolderE>(ApiHolderE::class) {
     override fun getUserBaseUrl(cls: Class<*>): IBaseUrl {
         val baseUrl = cls.getAnnotation(BaseUrl::class.java)
-        return if (baseUrl != null) IBaseUrl(baseUrl.value.release, baseUrl.append)
+        return if (baseUrl != null) BaseUrlData(baseUrl.value.release, baseUrl.append)
         else {
             throw IllegalArgumentException(String.format("%s: MUST ANNOTATE WITH 'BaseUrl'", cls.name))
         }
     }
 }
+
+private class BaseUrlData(override val value: String, override val append: String) : IBaseUrl
 
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
